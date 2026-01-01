@@ -52,6 +52,21 @@ export const deleteSessionDocs = async (sessionId) => {
   }
 };
 
+export const cleanupOldSessions = async () => {
+  try {
+    const queryText = `
+      DELETE FROM document_embeddings 
+      WHERE created_at < NOW() - INTERVAL '24 hours'
+    `;
+    const res = await pool.query(queryText);
+    if (res.rowCount > 0) {
+      console.log(` Auto-cleanup: Removed ${res.rowCount} old vector chunks.`);
+    }
+  } catch (error) {
+    console.error("Auto-cleanup failed:", error.message);
+  }
+};
+
 export const searchSimilarDocuments = async (queryText, sessionId) => {
   try {
     const queryVector = await embeddingModel.embedQuery(queryText);

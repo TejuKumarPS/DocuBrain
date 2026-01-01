@@ -3,6 +3,7 @@ import { RecursiveCharacterTextSplitter } from "@langchain/textsplitters";
 import {
   generateAndStoreEmbedding,
   deleteSessionDocs,
+  cleanupOldSessions,
 } from "../services/embeddingService.js";
 
 export const uploadDocument = async (req, res) => {
@@ -20,6 +21,8 @@ export const uploadDocument = async (req, res) => {
       `Processing file: ${req.file.originalname} for session: ${sessionId}`
     );
 
+    cleanupOldSessions();
+
     await deleteSessionDocs(sessionId);
 
     // Load PDF using loadPDFFromBuffer
@@ -36,6 +39,10 @@ export const uploadDocument = async (req, res) => {
     const chunks = await splitter.splitDocuments(docs);
 
     console.log(`Split into ${chunks.length} chunks`);
+
+    if(chunks.length === 0) {
+      return res.status(400).json({ error: "No content found in the PDF." });
+    }
 
     // Loop throught the chunks and save to DB
     let savedCount = 0;
