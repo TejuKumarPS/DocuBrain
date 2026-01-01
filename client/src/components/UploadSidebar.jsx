@@ -10,7 +10,12 @@ import {
 import { motion, AnimatePresence } from "framer-motion";
 import axios from "axios";
 
-const UploadSidebar = ({ onUploadSuccess, activeDoc, sessionId }) => {
+const UploadSidebar = ({
+  onUploadSuccess,
+  activeDoc,
+  sessionId,
+  startNewChat,
+}) => {
   const [isHovering, setIsHovering] = useState(false);
   const [uploadStatus, setUploadStatus] = useState("idle"); // idle | uploading | success | error
   const fileInputRef = useRef(null);
@@ -25,10 +30,14 @@ const UploadSidebar = ({ onUploadSuccess, activeDoc, sessionId }) => {
     formData.append("sessionId", sessionId);
 
     try {
-      await axios.post("http://localhost:5000/upload", formData, {
+      await axios.post("http://127.0.0.1:5000/upload", formData, {
         headers: { "Content-Type": "multipart/form-data" },
       });
+      console.log("File uploaded successfully");
       setUploadStatus("success");
+      if (startNewChat) {
+        startNewChat();
+      }
       onUploadSuccess(file.name);
       setTimeout(() => setUploadStatus("idle"), 3000);
     } catch (error) {

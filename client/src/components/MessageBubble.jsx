@@ -1,6 +1,7 @@
 import React from "react";
 import { Bot, User, Sparkles, FileText } from "lucide-react";
 import { motion } from "framer-motion";
+import ReactMarkdown from "react-markdown";
 
 const MessageBubble = ({ message }) => {
   const isAi = message.role === "ai";
@@ -47,7 +48,13 @@ const MessageBubble = ({ message }) => {
         }
       `}
       >
-        <p className="whitespace-pre-wrap font-medium">{message.content}</p>
+        {isAi ? (
+          <div className="prose prose-sm max-w-none text-slate-700 prose-headings:font-bold prose-strong:font-bold prose-strong:text-slate-900">
+            <ReactMarkdown>{message.content}</ReactMarkdown>
+          </div>
+        ) : (
+          <p className="whitespace-pre-wrap font-medium">{message.content}</p>
+        )}
 
         {/* Citations Section (Only for AI) */}
         {isAi && message.sources && message.sources.length > 0 && (

@@ -35,6 +35,10 @@ function App() {
     scrollToBottom();
   }, [messages, isLoading]);
 
+  const startNewChat = () => {
+    setMessages([]);
+  }
+
   const parseStreamChunk = (chunk) => {
     // Clean up the "data: " prefix and parse JSON
     const lines = chunk.split("\n\n");
@@ -98,8 +102,11 @@ function App() {
             // Update the sources of the last message
             setMessages((prev) => {
               const newMsgs = [...prev];
-              const lastMsg = newMsgs[newMsgs.length - 1];
-              lastMsg.sources = packet.sources;
+              const lastMsgIndex = newMsgs.length - 1;
+              newMsgs[lastMsgIndex] = {
+                ...newMsgs[lastMsgIndex],
+                sources: packet.sources,
+              };
               return newMsgs;
             });
           }
@@ -108,8 +115,11 @@ function App() {
             // Append token to the content
             setMessages((prev) => {
               const newMsgs = [...prev];
-              const lastMsg = newMsgs[newMsgs.length - 1];
-              lastMsg.content += packet.content;
+              const lastMsgIndex = newMsgs.length - 1;
+              newMsgs[lastMsgIndex] = {
+                ...newMsgs[lastMsgIndex],
+                content: newMsgs[lastMsgIndex].content + packet.content,
+              };
               return newMsgs;
             });
           }
@@ -135,6 +145,7 @@ function App() {
           onUploadSuccess={setActiveDoc}
           activeDoc={activeDoc}
           sessionId={sessionId}
+          startNewChat={startNewChat}
         />
       </div>
 
