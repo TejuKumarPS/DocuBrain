@@ -29,8 +29,10 @@ const UploadSidebar = ({
     formData.append("pdf", file);
     formData.append("sessionId", sessionId);
 
+    const apiUrl = import.meta.env.VITE_API_URL;
+
     try {
-      await axios.post("http://127.0.0.1:5000/upload", formData, {
+      await axios.post(`${apiUrl}/upload`, formData, {
         headers: { "Content-Type": "multipart/form-data" },
       });
       console.log("File uploaded successfully");

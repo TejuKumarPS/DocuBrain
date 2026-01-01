@@ -37,7 +37,7 @@ function App() {
 
   const startNewChat = () => {
     setMessages([]);
-  }
+  };
 
   const parseStreamChunk = (chunk) => {
     // Clean up the "data: " prefix and parse JSON
@@ -68,9 +68,11 @@ function App() {
     // Create a Placeholder AI Message (Empty for now)
     setMessages((prev) => [...prev, { role: "ai", content: "", sources: [] }]);
 
+    const apiUrl = import.meta.env.VITE_API_URL;
+
     try {
       // 1. Start the Fetch Stream
-      const response = await fetch("http://localhost:5000/chat", {
+      const response = await fetch(`${apiUrl}/chat`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
