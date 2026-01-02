@@ -130,7 +130,7 @@ function App() {
 
   return (
     <div className="flex h-screen bg-slate-50 overflow-hidden relative">
-      <div className="md:hidden fixed top-0 left-0 right-0 h-16 bg-white border-b border-slate-200 flex items-center px-4 z-50">
+      <div className="md:hidden fixed top-0 left-0 right-0 h-19 bg-white border-b border-slate-200 flex items-center px-4 z-50">
         <button
           onClick={() => setIsSidebarOpen(!isSidebarOpen)}
           className="p-2 text-slate-600 hover:bg-slate-100 rounded-lg active:bg-slate-200 transition-colors"
