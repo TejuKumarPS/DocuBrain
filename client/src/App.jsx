@@ -1,6 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
-import { Send, Sparkles, Loader2, ArrowRight } from "lucide-react";
-import axios from "axios";
+import { Loader2, ArrowRight, Menu, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
 import UploadSidebar from "./components/UploadSidebar";
@@ -18,6 +17,7 @@ function App() {
     },
   ]);
   const [sessionId, setSessionId] = useState("");
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   useEffect(() => {
     const newSessionId = Math.random().toString(36).substring(7);
@@ -37,10 +37,10 @@ function App() {
 
   const startNewChat = () => {
     setMessages([]);
+    setIsSidebarOpen(false);
   };
 
   const parseStreamChunk = (chunk) => {
-    // Clean up the "data: " prefix and parse JSON
     const lines = chunk.split("\n\n");
     return lines
       .filter((line) => line.startsWith("data: "))
@@ -61,17 +61,13 @@ function App() {
 
     const userMessage = input;
     setInput("");
-    // Create User Message
     setMessages((prev) => [...prev, { role: "user", content: userMessage }]);
     setIsLoading(true);
-
-    // Create a Placeholder AI Message (Empty for now)
     setMessages((prev) => [...prev, { role: "ai", content: "", sources: [] }]);
 
     const apiUrl = import.meta.env.VITE_API_URL;
 
     try {
-      // 1. Start the Fetch Stream
       const response = await fetch(`${apiUrl}/chat`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -84,7 +80,6 @@ function App() {
         }),
       });
 
-      // 2. Read the Stream
       const reader = response.body.getReader();
       const decoder = new TextDecoder();
       let done = false;
@@ -93,15 +88,11 @@ function App() {
         const { value, done: doneReading } = await reader.read();
         done = doneReading;
         const chunkValue = decoder.decode(value, { stream: true });
-
-        // 3. Process Data Packets
         const packets = parseStreamChunk(chunkValue);
 
         for (const packet of packets) {
           if (!packet) continue;
-
           if (packet.type === "sources") {
-            // Update the sources of the last message
             setMessages((prev) => {
               const newMsgs = [...prev];
               const lastMsgIndex = newMsgs.length - 1;
@@ -112,9 +103,7 @@ function App() {
               return newMsgs;
             });
           }
-
           if (packet.type === "content") {
-            // Append token to the content
             setMessages((prev) => {
               const newMsgs = [...prev];
               const lastMsgIndex = newMsgs.length - 1;
@@ -140,9 +129,36 @@ function App() {
   };
 
   return (
-    <div className="flex h-screen bg-slate-50 font-sans text-slate-900 overflow-hidden">
-      {/* Sidebar (Left) */}
-      <div className="hidden md:block h-full">
+    <div className="flex h-screen bg-slate-50 overflow-hidden relative">
+      <div className="md:hidden fixed top-0 left-0 right-0 h-16 bg-white border-b border-slate-200 flex items-center px-4 z-50">
+        <button
+          onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+          className="p-2 text-slate-600 hover:bg-slate-100 rounded-lg active:bg-slate-200 transition-colors"
+        >
+          {isSidebarOpen ? <X size={24} /> : <Menu size={24} />}
+        </button>
+        <span className="ml-3 font-bold text-lg text-indigo-600">
+          DocuBrain
+        </span>
+      </div>
+
+      <div
+        className={`
+          bg-white z-40 flex-shrink-0 border-r border-slate-200
+          fixed inset-y-0 left-0 w-80 transform transition-transform duration-300 ease-in-out
+          ${isSidebarOpen ? "translate-x-0 shadow-2xl" : "-translate-x-full"}
+          md:relative md:translate-x-0 md:shadow-none md:block
+        `}
+      >
+        <div className="md:hidden absolute top-4 right-4 z-50">
+          <button
+            onClick={() => setIsSidebarOpen(false)}
+            className="p-2 text-slate-400"
+          >
+            <X size={20} />
+          </button>
+        </div>
+
         <UploadSidebar
           onUploadSuccess={setActiveDoc}
           activeDoc={activeDoc}
@@ -151,9 +167,16 @@ function App() {
         />
       </div>
 
-      <div className="flex-1 flex flex-col h-full relative">
-        <div className="flex-1 overflow-y-auto px-4 md:px-20 py-8 scroll-smooth">
-          <div className="max-w-4xl mx-auto space-y-2">
+      {isSidebarOpen && (
+        <div
+          className="fixed inset-0 bg-black/50 z-30 md:hidden"
+          onClick={() => setIsSidebarOpen(false)}
+        />
+      )}
+
+      <div className="flex-1 flex flex-col h-full relative min-w-0 pt-16 md:pt-0">
+        <div className="flex-1 overflow-y-auto p-4 md:p-6 scroll-smooth">
+          <div className="max-w-3xl mx-auto space-y-6">
             {messages.map((msg, index) => (
               <MessageBubble key={index} message={msg} />
             ))}
@@ -177,12 +200,11 @@ function App() {
                 </motion.div>
               )}
             </AnimatePresence>
-
             <div ref={messagesEndRef} className="h-4" />
           </div>
         </div>
 
-        <div className="p-6 bg-white/80 backdrop-blur-md border-t border-slate-200">
+        <div className="p-4 bg-white/80 backdrop-blur-md border-t border-slate-200 z-10">
           <div className="max-w-4xl mx-auto">
             <form
               onSubmit={handleSend}
@@ -190,7 +212,7 @@ function App() {
                 relative flex items-center gap-2 p-2 rounded-2xl border transition-all duration-300
                 ${
                   activeDoc
-                    ? "bg-slate-50 border-slate-200 focus-within:border-indigo-400 focus-within:ring-4 focus-within:ring-indigo-100 shadow-sm"
+                    ? "bg-white border-slate-200 shadow-sm focus-within:border-indigo-500 focus-within:ring-4 focus-within:ring-indigo-50"
                     : "bg-slate-100 border-transparent opacity-60 cursor-not-allowed"
                 }
               `}
@@ -200,14 +222,11 @@ function App() {
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 placeholder={
-                  activeDoc
-                    ? "Ask something about your document..."
-                    : "Please upload a PDF to start chatting..."
+                  activeDoc ? "Ask something..." : "Upload a PDF first..."
                 }
                 disabled={!activeDoc || isLoading}
-                className="flex-1 bg-transparent border-none focus:ring-0 text-slate-700 placeholder:text-slate-400 px-4 py-3 text-base"
+                className="flex-1 bg-transparent border-none outline-none focus:ring-0 text-slate-700 placeholder:text-slate-400 px-4 py-3 text-base"
               />
-
               <button
                 type="submit"
                 disabled={!input.trim() || isLoading || !activeDoc}
@@ -227,10 +246,6 @@ function App() {
                 )}
               </button>
             </form>
-
-            <p className="text-center text-[10px] text-slate-400 mt-3">
-              DocuBrain uses AI to read documents. Mistakes are possible.
-            </p>
           </div>
         </div>
       </div>
