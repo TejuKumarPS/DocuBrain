@@ -6,6 +6,7 @@ import {
   AlertCircle,
   CheckCircle,
   Database,
+  Bot,
 } from "lucide-react";
 
 const UploadSidebar = ({ sessionId, onUploadSuccess, activeDoc }) => {
@@ -51,8 +52,8 @@ const UploadSidebar = ({ sessionId, onUploadSuccess, activeDoc }) => {
     <div className="h-full flex flex-col bg-white overflow-y-auto">
       <div className="p-6 flex flex-col gap-6">
         <div className="flex items-center gap-3 text-indigo-600">
-          <div className="p-2 bg-indigo-50 rounded-lg">
-            <FileText size={24} />
+          <div className="p-2 bg-indigo-600 rounded-xl text-white shadow-lg shadow-indigo-200">
+            <Bot size={28} />
           </div>
           <h1 className="font-bold text-xl tracking-tight text-slate-800">
             DocuBrain
