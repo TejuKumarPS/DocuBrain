@@ -6,7 +6,7 @@
 
 **DocuBrain** is a full-stack Retrieval-Augmented Generation (RAG) application that allows users to have natural, context-aware conversations with their PDF documents. unlike standard keyword search, DocuBrain understands the *semantic meaning* of queries and retrieves exact answers with citations.
 
-🔗 **Live Demo:** [DocuBrain](https://docu-brain-a1vc9ppxx-teju-kumar-p-ss-projects.vercel.app)
+🔗 **Live Demo:** [DocuBrain](https://docu-brain-h2qoz0uwl-teju-kumar-p-ss-projects.vercel.app)
 
 ---
 
